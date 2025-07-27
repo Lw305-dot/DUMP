@@ -1,0 +1,70 @@
+import pandas as pd
+from openpyxl import Workbook
+from openpyxl.utils.dataframe import dataframe_to_rows
+from pathlib import Path
+import re
+
+master_path = Path("/workspaces/DUMP/Training Progress Tracker.xlsx")
+output_dir = Path("/workspaces/DUMP/Employee_Reports")
+output_dir.mkdir(exist_ok=True)
+
+# --- FUNCTION TO FIND HEADER ROW ---
+def find_header_row(sheet_name, file_path):
+    """Finds the row number that contains 'Emp. No.' and 'Employee Name'."""
+    preview = pd.read_excel(file_path, sheet_name=sheet_name, header=None, nrows=20)
+    for i, row in preview.iterrows():
+        if "Emp. No." in row.values and "Employee Name" in row.values:
+            return i
+    raise ValueError(f"Could not find header row in sheet: {sheet_name}")
+
+# --- LOAD ALL SHEETS ---
+sheet_names = [
+    "Cargo Trainings",
+    "DFW Trainings",
+    "AMH Trainings",
+    "CBF Trainings",
+    "SOPS",
+    "EXAMS",
+]
+
+all_dfs = []
+for sheet in sheet_names:
+    header_row = find_header_row(sheet, master_path)
+    df = pd.read_excel(master_path, sheet_name=sheet, header=header_row)
+    df.columns = df.columns.str.strip()  # clean column names
+    all_dfs.append(df)
+
+# --- CLEAN FILENAME ---
+def clean_filename(name):
+    return re.sub(r'[\\/*?:"<>|]', "_", str(name))
+
+# --- GET UNIQUE EMPLOYEES ---
+employee_ids = set()
+for df in all_dfs:
+    if "Emp. No." not in df.columns or "Employee Name" not in df.columns:
+        raise ValueError(f"Sheet missing required columns: {df.columns.tolist()}")
+    employee_ids.update(zip(df["Emp. No."], df["Employee Name"]))
+
+employee_list = list(employee_ids)[:20]  # limit to first 20 employees for testing
+
+# --- CREATE REPORTS FOR FIRST 20 EMPLOYEES ---
+for emp_id, emp_name in employee_list:
+    emp_name_clean = clean_filename(emp_name)
+    file_name = f"trainings_for_{emp_name_clean}_{emp_id}.xlsx"
+    report_path = output_dir / file_name
+
+    wb = Workbook()
+    wb.remove(wb.active)
+
+    for df, sheet_name in zip(all_dfs, sheet_names):
+        ws = wb.create_sheet(title=sheet_name)
+        emp_df = df[df["Emp. No."] == emp_id]
+        if emp_df.empty:
+            ws.append([f"No records found for {emp_name} in {sheet_name}"])
+            continue
+        for r in dataframe_to_rows(emp_df, index=False, header=True):
+            ws.append(r)
+
+    wb.save(report_path)
+
+print(f"First 20 employee training files created in: {output_dir}")
