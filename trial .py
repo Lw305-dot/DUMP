@@ -7,12 +7,15 @@ import qrcode
 from PIL import Image, ImageDraw
 
 master_path = Path("/workspaces/DUMP/Training Progress Tracker.xlsx")
-output_dir = Path("/workspaces/DUMP/Employee_Reports")
+# output_dir = Path("/workspaces/DUMP/Employee_Reports")
+# output_dir=Path("https://lodigeindustries-my.sharepoint.com/:f:/r/personal/l_karuru_lodige_com/Documents/test?csf=1&web=1&e=cBaadH")
+output_dir = Path("C:/Users/l.karuru/OneDrive - Lödige Industries GmbH/test")
 output_dir.mkdir(exist_ok=True) 
 qr_dir = output_dir / "QR_Codes"
 qr_dir.mkdir(exist_ok=True)
 
-BASE_URL = "C://Users//l.karuru//OneDrive - Lödige Industries GmbH//test"
+# BASE_URL = "C://Users//l.karuru//OneDrive - Lödige Industries GmbH//test"
+BASE_URL="https://lodigeindustries-my.sharepoint.com/:f:/r/personal/l_karuru_lodige_com/Documents/test?csf=1&web=1&e=AdXqP4"
 # --- FUNCTION TO FIND HEADER ROW ---
 def find_header_row(sheet_name, file_path):
     """Finds the row number that contains 'Emp. No.' and 'Employee Name'."""
@@ -81,6 +84,7 @@ for emp_id, emp_name in employee_list:
             ws.append(r)
 
     wb.save(report_path)
+
 for excel_file in output_dir.glob("*.xlsx"):
     # Extract the employee info from the file name
     emp_name_id = excel_file.stem.replace("trainings_for_", "")
