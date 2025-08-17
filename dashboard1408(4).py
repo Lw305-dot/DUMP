@@ -168,5 +168,14 @@ for _, emp in employees.iterrows():
 
     file_path = output_dir / f"{emp_name} {emp_no}.xlsx"
     wb.save(file_path)
+    # --- Create QR Code for this employee file ---
+    file_url = BASE_URL + file_path.name
+    qr_file_path = qr_dir / f"Qr_code_for_{emp_name}_{emp_no}.png"
+    qr = qrcode.QRCode(version=1, box_size=10, border=4)
+    qr.add_data(file_url)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    img.save(qr_file_path)
 
-print("✅ Dashboards created successfully!")
+print("Dashboards & QR codes created successfully!")
+
