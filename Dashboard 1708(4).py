@@ -164,4 +164,3 @@ for _, emp in employees.iterrows():
     img.save(qr_file_path)
 
 print("Dashboards & QR codes created successfully!")
-
