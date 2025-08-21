@@ -1,6 +1,6 @@
 import pandas as pd 
 from openpyxl.utils import get_column_letter
-from openpyxl.styles import Alignment, Border, Side, Font
+from openpyxl.styles import Alignment, Border, Side, Font,numbers
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 from pathlib import Path
@@ -9,9 +9,9 @@ import re
 import qrcode
 
 master_path = Path("/workspaces/DUMP/Training Progress Tracker.xlsx")
-output_dir = Path("/workspaces/DUMP/Employee_Reports15")
+output_dir = Path("/workspaces/DUMP/Employee_Reports16")
 output_dir.mkdir(exist_ok=True)
-qr_dir = Path("/workspaces/DUMP/Employee_Reports15/QR_Codes")
+qr_dir = Path("/workspaces/DUMP/Employee_Reports16/QR_Codes")
 output_dir.mkdir(exist_ok=True)
 qr_dir.mkdir(exist_ok=True) 
 
@@ -64,6 +64,14 @@ def style_sheet(ws):
         for cell in row:
             cell.alignment = align
             cell.border = thin_border
+    for row in ws.iter_rows(min_row=2, min_col=3, max_col=4):  # TRAINING DATE and EXPIRY DATE columns
+        for cell in row:
+            if isinstance(cell.value, datetime):
+                cell.number_format = 'DD-MMM-YYYY'
+    for row in ws.iter_rows(min_row=2, min_col=3, max_col=3):  # EXAM DATE column
+        for cell in row:
+            if isinstance(cell.value, datetime):
+                cell.number_format = 'DD-MMM-YYYY'      
 
     # Auto-fit column widths, skipping the first row
     for col in ws.columns:
