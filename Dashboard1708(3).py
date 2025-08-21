@@ -102,7 +102,7 @@ for _, emp in employees.iterrows():
                     ])
 
     training_df = pd.DataFrame(training_records, columns=[
-        "SN", "TRAININGS", "TRAINING DATE", "EXPIRY DATE", "PERIOD TO EXPIRE", "CURRENT DATE", "STATUS"
+        "SN", "TRAININGS", "TRAINING DATE", "EXPIRY DATE", "PERIOD TO EXPIRE", "LAST UPDATE", "STATUS"
     ])
     training_df.drop_duplicates(subset=["TRAININGS", "TRAINING DATE"], inplace=True)
     training_df["SN"] = range(1, len(training_df) + 1)
