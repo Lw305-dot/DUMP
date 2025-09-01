@@ -37,9 +37,9 @@ def shorten_name(emp_name, max_parts=3):
 
 def create_id_card(emp_no, emp_name, qr_file_path, logo_path):
     # Constants (ID card size)
-    CARD_WIDTH, CARD_HEIGHT = 346, 210
-    MARGIN = 10
-    GAP = 8
+    CARD_WIDTH, CARD_HEIGHT = 347, 210
+    MARGIN = 18
+    GAP = 6
     IMAGE_SIZE = 100
 
     # Load images
@@ -77,7 +77,7 @@ def create_id_card(emp_no, emp_name, qr_file_path, logo_path):
     emp_name_short = shorten_name(emp_name, max_parts=3)
     title_text = "TRAINING ID"
     staff_text = f"Staff ID : {emp_no}"
-    name_text = f"Name : {emp_name_short}"
+    name_text = f"Name :{emp_name_short}"
 
     # Dummy draw for measuring text
     dummy_img = PILImage.new("RGB", (1, 1))

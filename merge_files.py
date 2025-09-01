@@ -3,7 +3,7 @@ from docx.shared import Inches, Pt
 from pathlib import Path
 
 # Paths
-cards_dir = Path("./Employee_Reports23/TrainingIDs")
+cards_dir = Path("./Employee_Reports26/TrainingIDs")
 output_docx = Path("merged_idCards.docx")
 
 # Create document
