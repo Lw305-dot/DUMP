@@ -227,7 +227,7 @@ training_lookup = {
     }
     for _, row in training_lookup_df.iterrows()
 }
-EXAM_OUTDATED_DAYS = 600   # exam becomes “outdated” after this many days
+EXAM_OUTDATED_DAYS = 800   # exam becomes “outdated” after this many days
 WRONGLY_FORMATTED_AFTER_DAYS = -1000  # training days_left < -700 ⇒ flag as wrongly formatted
 HEADER_FILL = PatternFill(fill_type="solid", start_color="1F4E78", end_color="1F4E78")  # blue
 HEADER_FONT = Font(bold=True, color="FFFFFF")
@@ -317,9 +317,6 @@ for sheet in sheet_names:
     header_row = find_header_row(sheet, master_path)
     df = pd.read_excel(master_path, sheet_name=sheet, header=header_row)
 
-
-
-  
     cleaned_cols = []
     for col in df.columns:
         col_str = str(col)
@@ -391,7 +388,7 @@ for _, emp in employees.iterrows():
                 if days_left is not None and days_left < WRONGLY_FORMATTED_AFTER_DAYS:
                     remark = "this is a wronlgy formatted date and it will be corrected in the future"
                 status = (
-                    "VALID" if days_left is not None and days_left >= 0
+                    "VALID" if days_left is not None and days_left >= 40
                     else "NOT VALID" if days_left is not None
                     else "NOT Applicable"
                 )
