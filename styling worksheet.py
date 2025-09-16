@@ -426,23 +426,44 @@ for _, emp in employees.iterrows():
                     exam_name_display = exam_name_col.replace("_", " ").title()
                     exam_date = pd.to_datetime(row[col], errors="coerce")
                     mark = row[exam_name_col]
+                    mark_value = mark
+                    comment = ""
                     if pd.notna(mark) and str(mark).strip() != "":
-                      comment = ""
+                        mark_str = str(mark).strip()
+                        try:
+                            if mark_str.endswith("%"):
+                                mark_value = float(mark_str.rstrip("%"))
+                            else:
+                                mark_value = float(mark_str)
+                        except ValueError:
+                            mark_value = None
+                    low_mark = mark_value is not None and mark_value < 75
+                    exam_outdated = False
                     if pd.isna(exam_date):
-                        comment = "Kindly redo your exam the exam is outdated"
+                        if low_mark:
+                            comment = "This is a low mark please retake the exam"
+                        else:
+                            comment = "Kindly redo your exam the exam is outdated"
                     else:
                         age_days = (today - exam_date).days
                         if age_days > EXAM_OUTDATED_DAYS:
-                            comment = "Kindly redo your exam the exam is outdated"
+                            exam_outdated = True
+                        # Compose comment based on both conditions
+                        if low_mark and exam_outdated:
+                            comment = "This is a low mark please retake the exam and kindly retake your exam this exam is outdated"
+                        elif low_mark:
+                            comment = "This is a low mark please retake the exam"
+                        elif exam_outdated:
+                            comment = "Kindly retake your exam this exam is outdated"
                         else:
-                            comment = "OK"
-                        exam_records.append([
-                            None,
-                            exam_name_display,
-                            exam_date.strftime('%d-%b-%Y') if pd.notna(exam_date) else '',
-                            mark,
-                            comment
-                        ])
+                            comment = "date is valid"
+                    exam_records.append([
+                        None,
+                        exam_name_display,
+                        exam_date.strftime('%d-%b-%Y') if pd.notna(exam_date) else '',
+                        mark,
+                        comment
+                    ])
 
     exam_df = pd.DataFrame(exam_records, columns=["SN", "EXAM", "EXAM DATE", "MARKS ATTAINED","COMMENTS"])
     if not exam_df.empty:
