@@ -5,7 +5,8 @@ from pathlib import Path
 
 # Settings
 output_pdf = "ID_Cards.pdf"
-cards_dir = Path("./Employee_Reports26/TrainingIDs")
+# cards_dir = Path("./Employee_Reports26/TrainingIDs")
+cards_dir = Path("./Generated_IDs4")
 card_files = sorted(cards_dir.glob("ID_CARD_*.png"))
 
 # A4 page setup

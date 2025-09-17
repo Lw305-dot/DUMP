@@ -10,12 +10,12 @@ import qrcode
 from PIL import Image as PILImage, ImageDraw, ImageFont
 
 PHOTO_DIR = Path("/workspaces/DUMP/Generated_IDs3")
-master_path = Path("/workspaces/DUMP/Training Progress Tracker2.xlsx")
+master_path = Path("/workspaces/DUMP/Training Progress Tracker3.xlsx")
 training_list_path = Path("/workspaces/DUMP/MASTER LIST Module number.xlsx")
 
 output_dir = Path("/workspaces/DUMP/Employee_Reports29")
-trainingid_dir= Path("/workspaces/DUMP/Employee_Reports28/TrainingIDs")
-qr_dir = Path("/workspaces/DUMP/Employee_Reports28/QR_Codes")
+trainingid_dir= Path("/workspaces/DUMP/Employee_Reports29/TrainingIDs")
+qr_dir = Path("/workspaces/DUMP/Employee_Reports29/QR_Codes")
 output_dir.mkdir(exist_ok=True)
 qr_dir.mkdir(exist_ok=True)
 trainingid_dir.mkdir(exist_ok=True)
@@ -218,12 +218,14 @@ def deduplicate_columns(cols):
             seen[col] += 1
             new_cols.append(f"{col}_{seen[col]}")
     return new_cols
-
+training_lookup_df.columns = deduplicate_columns( training_lookup_df.columns.str.strip
+                                                 ().str.lower()
+)
 training_lookup = {
-    str(row["Trainings"]).strip().lower(): {
-        "code": row["CODE"],
-        "facility": row["FACILITY"],
-        "category": row["Category"]
+    str(row["trainings"]).strip().lower(): {
+        "code": row["code_1"] if pd.notna(row.get("code_1")) else row.get("code", ""),
+        "facility": row["facility"],
+        "category": row["category"]
     }
     for _, row in training_lookup_df.iterrows()
 }
@@ -368,9 +370,8 @@ for _, emp in employees.iterrows():
     emp_name = emp['employee name']
     emp_info_df = pd.read_excel("Employee Designations.xlsx")
     emp_info_df.columns = emp_info_df.columns.str.lower()
-    print(emp_info_df.columns.tolist())
     emp_desg = emp_info_df.loc[emp_info_df["emp. no."] == emp_no]
-    emp_desg_value = emp_desg.get("job description", pd.Series(["N/A"])).iloc[0]
+    emp_desg_value = emp_desg["job description"].iloc[0] if not emp_desg.empty else "N/A"
     
     # --- Collect Training Records ---
     training_records = []
@@ -422,9 +423,11 @@ for _, emp in employees.iterrows():
     training_df.drop_duplicates(subset=["TRAININGS", "TRAINING DATE"], inplace=True)
     training_df["SN"] = range(1, len(training_df) + 1)
 
-
-    emp_desg_value = emp_desg.iloc[0] if not emp_desg.empty else "N/A"
-    training_df.loc[len(training_df)] = [ "YOU ARE LISTED AS ;",emp_desg_value,"YOUR TRAINING DASHBOARD" ]
+    # Add emp_desg_value as a final row in the training dashboard
+    # Fill other columns with empty strings for clarity
+    if emp_desg_value != "N/A":
+        desg_row = ["", f"YOU ARE LISTED AS ; {emp_desg_value}", "& THIS IS YOUR TRAINING DASHBOARD"] + ["" for _ in range(len(training_df.columns)-3)]
+        training_df.loc[len(training_df)] = desg_row
     # --- Collect Exam Records ---
     exam_records = []
     if "EXAMS" in all_dfs:
@@ -518,13 +521,13 @@ for _, emp in employees.iterrows():
        qr_filename = f"Qr_code_for_{emp_no}.png"
 
     else:
-        safe_emp_name = re.sub(r'[\\/*?:"<>|]', "", safe_emp_name)  # remove invalid chars
+        safe_emp_name = re.sub(r'[\\/*?:"<>|]', "", safe_emp_name)
         filename = f"{safe_emp_name} {emp_no}.xlsx"
         qr_filename = f"Qr_code_for_{safe_emp_name}_{emp_no}.png"
     file_path = output_dir/filename
     wb.save(file_path)
     
-    file_url = BASE_URL + file_path.name
+    # file_url = BASE_URL + file_path.name
     # qr_file_path = qr_dir/qr_filename
     # qr = qrcode.QRCode(version=1, box_size=10, border=4)
     # qr.add_data(file_url)
