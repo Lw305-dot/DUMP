@@ -13,7 +13,7 @@ PHOTO_DIR = Path("/workspaces/DUMP/Generated_IDs3")
 master_path = Path("/workspaces/DUMP/Training Progress Tracker.xlsx")
 training_list_path = Path("/workspaces/DUMP/MASTER LIST Module number.xlsx")
 
-output_dir = Path("/workspaces/DUMP/Employee_Reports30")
+output_dir = Path("/workspaces/DUMP/Employee_Reports31")
 # trainingid_dir= Path("/workspaces/DUMP/Employee_Reports30/TrainingIDs")
 # qr_dir = Path("/workspaces/DUMP/Employee_Reports30/QR_Codes")
 output_dir.mkdir(exist_ok=True)
