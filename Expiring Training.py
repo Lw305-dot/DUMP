@@ -8,7 +8,7 @@ from pathlib import Path
 source_folder = Path("/workspaces/DUMP/Employee_Reports35")
 output_dir = Path("/workspaces/DUMP/Expired Trainings")
 output_dir.mkdir(exist_ok=True)
-output_file = output_dir / "expired_training_summary.xlsx"
+output_file = output_dir / "expired_training_summary2.xlsx"
 
 expired_data = []
 sop_data = []
