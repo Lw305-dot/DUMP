@@ -4,9 +4,9 @@ from reportlab.lib.utils import ImageReader
 from pathlib import Path
 
 # Settings
-output_pdf = "ID_Cards.pdf"
+output_pdf = "ID_Cards2026.pdf"
 # cards_dir = Path("./Employee_Reports26/TrainingIDs")
-cards_dir = Path("./Generated_IDs4")
+cards_dir = Path("/workspaces/DUMP/2026 Pending Ids")
 card_files = sorted(cards_dir.glob("ID_CARD_*.png"))
 
 # A4 page setup
@@ -29,6 +29,7 @@ y = PAGE_HEIGHT - MARGIN - CARD_HEIGHT
 cards_in_row = 0
 
 for i, img_path in enumerate(card_files):
+    print(f"Processing: {img_path.name} ({i + 1}/{len(card_files)})")
     c.drawImage(ImageReader(img_path), x, y, width=CARD_WIDTH, height=CARD_HEIGHT)
 
     cards_in_row += 1
