@@ -12,192 +12,10 @@ from PIL import Image as PILImage, ImageDraw, ImageFont
 PHOTO_DIR = Path("/workspaces/DUMP/Generated_IDs5")
 master_path = Path("/workspaces/DUMP/Training Progress Tracker.xlsx")
 training_list_path = Path("/workspaces/DUMP/MASTER LIST Module number.xlsx")
-
-output_dir = Path("/workspaces/DUMP/Employee_Reports45")
-# trainingid_dir= Path("/workspaces/DUMP/Employee_Reports32/TrainingIDs")
-# qr_dir = Path("/workspaces/DUMP/Employee_Reports32/QR_Codes")
-output_dir.mkdir(exist_ok=True)   
-# qr_dir.mkdir(exist_ok=True)
-# trainingid_dir.mkdir(exist_ok=True)
-
-BASE_URL = "https://lodigeindustries-my.sharepoint.com/:f:/r/personal/l_karuru_lodige_com/Documents/Trainings/"
-logo_path=Path("/workspaces/DUMP/logo.png")
 training_sheets = pd.read_excel(training_list_path, sheet_name=["Manuals", "SOPs"])
 training_lookup_df = pd.concat(training_sheets.values(), ignore_index=True)
-logo_path="/workspaces/DUMP/logo.png"
-
-# def shorten_name(emp_name, max_length=20):
-#     """
-#     Take up to 3 words of the name.
-#     Count characters only (ignore spaces).
-#     If total length > max_length, cut the 3rd word and add '...'.
-#     """
-#     parts = emp_name.split()
-#     if not parts:
-#         return ""
-
-#     # Take up to 3 words
-#     parts = parts[:3]
-
-#     # Calculate total length without spaces
-#     total_len = sum(len(p) for p in parts)
-
-#     if total_len <= max_length:
-#         return " ".join(parts)
-
-#     # If too long and 3rd word exists → trim it
-#     if len(parts) == 3:
-#         first_two_len = len(parts[0]) + len(parts[1])
-#         allowed_third_len = max_length - first_two_len
-#         if allowed_third_len > 0:
-#             parts[2] = parts[2][:allowed_third_len] + "..."
-#             return " ".join(parts)
-#         else:
-#             # Not enough space for third word at all
-#             return f"{parts[0]} {parts[1]}..."
-#     else:
-#         # Only 1–2 words, just truncate whole name
-#         return emp_name[:max_length] + "..."
-
-
-# def create_id_card(emp_no, emp_name, qr_file_path, logo_path):
-#     # Constants (ID card size)
-#     CARD_WIDTH, CARD_HEIGHT = 346, 210
-#     MARGIN = 10
-#     GAP = 8
-#     IMAGE_SIZE = 100
-
-#     # Load images
-#     photo_path = PHOTO_DIR / f"{emp_no}.png"
-#     if not photo_path.exists():
-#         print(f"No photo for {emp_no}, skipping ID card.")
-#         return
-
-#     photo_img = PILImage.open(photo_path).convert("RGB")
-#     qr_img = PILImage.open(qr_file_path).convert("RGB")
-#     logo_img = PILImage.open(logo_path).convert("RGBA")
-
-#     # Resize photo & QR (same size)
-#     photo_img = photo_img.resize((IMAGE_SIZE, IMAGE_SIZE))
-#     qr_img = qr_img.resize((IMAGE_SIZE, IMAGE_SIZE))
-
-#     # Fonts
-#     try:
-#         title_font = ImageFont.truetype("DejaVuSans-Bold.ttf", 18)
-#         label_font = ImageFont.truetype("DejaVuSans.ttf", 12)
-#         footer_font = ImageFont.truetype("DejaVuSans.ttf", 9)
-#     except IOError:
-#         title_font = ImageFont.load_default()
-#         label_font = ImageFont.load_default()
-#         footer_font = ImageFont.load_default()
-
-#     # Create blank card
-#     card = PILImage.new("RGB", (CARD_WIDTH, CARD_HEIGHT), "white")
-#     draw = ImageDraw.Draw(card)
-
-#     # Border
-#     draw.rectangle([0, 0, CARD_WIDTH - 1, CARD_HEIGHT - 1], outline="black", width=1)
-
-#     # === Prepare text block ===
-#     emp_name_short = shorten_name(emp_name, max_length=20)
-#     title_text = "TRAINING ID"
-#     staff_text = f"Staff ID : {emp_no}"
-#     name_text = f"Name : {emp_name_short}"
-
-#     # Dummy draw for measuring text
-#     dummy_img = PILImage.new("RGB", (1, 1))
-#     dummy_draw = ImageDraw.Draw(dummy_img)
-
-#     # Measure text heights
-#     title_bbox = dummy_draw.textbbox((0, 0), title_text, font=title_font)
-#     staff_bbox = dummy_draw.textbbox((0, 0), staff_text, font=label_font)
-#     name_bbox = dummy_draw.textbbox((0, 0), name_text, font=label_font)
-
-#     title_height = title_bbox[3] - title_bbox[1]
-#     staff_height = staff_bbox[3] - staff_bbox[1]
-#     name_height = name_bbox[3] - name_bbox[1]
-
-#     # Define spacings
-#     spacing_between_lines = 5
-#     total_text_block_height = (
-#         title_height
-#         + spacing_between_lines
-#         + staff_height
-#         + spacing_between_lines
-#         + name_height
-#     )
-
-#     # === Resize logo to match total block height ===
-#     logo_target_height = total_text_block_height
-#     logo_ratio = logo_img.width / logo_img.height
-#     logo_width = int(logo_target_height * logo_ratio)
-#     logo_img = logo_img.resize((logo_width, logo_target_height))
-
-#     # --- Block heights ---
-#     top_section_height = max(logo_img.height, total_text_block_height)
-#     middle_block_height = IMAGE_SIZE
-#     footer_text = "Quality management compliance, authorized under Training protocols."
-#     footer_bbox = dummy_draw.textbbox((0, 0), footer_text, font=footer_font)
-#     footer_height = footer_bbox[3] - footer_bbox[1]
-
-#     total_content_height = top_section_height + middle_block_height + footer_height
-#     remaining_space = CARD_HEIGHT - total_content_height - 2 * MARGIN
-#     if remaining_space < 0:
-#         remaining_space = 0
-#     gap_y = remaining_space // 2
-
-#     # --- Place top block ---
-#     top_y = MARGIN
-#     logo_x = MARGIN
-#     logo_y = top_y + (top_section_height - logo_img.height) // 2
-#     card.paste(logo_img, (logo_x, logo_y), logo_img)
-
-#     text_x = logo_x + logo_img.width + 12
-#     text_y = top_y + (top_section_height - total_text_block_height) // 2
-#     draw.text((text_x, text_y), title_text, font=title_font, fill="black")
-#     draw.text(
-#         (text_x, text_y + title_height + spacing_between_lines),
-#         staff_text,
-#         font=label_font,
-#         fill="black",
-#     )
-#     draw.text(
-#         (
-#             text_x,
-#             text_y
-#             + title_height
-#             + spacing_between_lines
-#             + staff_height
-#             + spacing_between_lines,
-#         ),
-#         name_text,
-#         font=label_font,
-#         fill="black",
-#     )
-
-#     # --- middle block (photo + QR) with equal margins ---
-#     images_y = top_y + top_section_height + gap_y
-#     num_gaps = 3
-#     available_width = CARD_WIDTH - 2 * MARGIN
-#     total_images_width = photo_img.width + qr_img.width
-#     gap_x = (available_width - total_images_width) // num_gaps
-
-#     # Place photo
-#     photo_x = MARGIN + gap_x
-#     card.paste(photo_img, (photo_x, images_y))
-
-#     # Place QR
-#     qr_x = photo_x + photo_img.width + gap_x
-#     card.paste(qr_img, (qr_x, images_y))
-
-#     # --- Place footer ---
-#     footer_y = images_y + middle_block_height + gap_y
-#     footer_w = footer_bbox[2] - footer_bbox[0]
-#     footer_x = (CARD_WIDTH - footer_w) // 2
-#     draw.text((footer_x, footer_y), footer_text, font=footer_font, fill="gray")
-
-#     # Save card
-#     card.save(trainingid_dir / f"ID_CARD_{emp_no}.png")
+output_dir = Path("/workspaces/DUMP/Employee_Reports_wi46")
+output_dir.mkdir(exist_ok=True)   
 
     
 def find_header_row(sheet_name, file_path):
@@ -379,6 +197,7 @@ for _, emp in employees.iterrows():
     
     # --- Collect Training Records ---
     training_records = []
+    work_instruction_records = []
     for sheet_name, df in all_dfs.items():
         if sheet_name.upper() == "EXAMS":
             continue  # exams handled separately
@@ -427,6 +246,34 @@ for _, emp in employees.iterrows():
     ])
     training_df.drop_duplicates(subset=["TRAININGS", "TRAINING DATE"], inplace=True)
     training_df["SN"] = range(1, len(training_df) + 1)
+    if "Work Instruction" in all_dfs:
+        wi_df = all_dfs["Work Instruction"]
+        emp_rows=wi_df[wi_df['emp no'] == emp_no]
+        fixed_cols = [
+            "emp no",
+            "employee name",
+            "team",
+            "count"
+        ]
+        for _, row in emp_rows.iterrows():
+            for col in wi_df.columns:
+                if col.lower() in fixed_cols:
+                    continue
+                training_date = pd.to_datetime(row.get(col, None), errors="coerce")
+                if pd.isna(training_date):
+                    continue
+                expiry_date = training_date + timedelta(days=8000)
+                days_left = (expiry_date - today).days
+                status = ("EXPIRING SOON" if 1 <= days_left < 45 else "VALID"if days_left >= 40 else "EXPIRED")
+                work_instruction_records.append([
+                    None,
+                    col,
+                    training_date.strftime('%d-%b-%Y'),
+                    expiry_date.strftime('%d-%b-%Y'),
+                    days_left,
+                    status
+                ])
+
 
     # Add emp_desg_value as a final row in the training dashboard
     # Fill other columns with empty strings for clarity
@@ -502,6 +349,20 @@ for _, emp in employees.iterrows():
             export_df.loc[len(export_df)] = ["", "", "TOTAL AVERAGE", f"{avg:.2f}%", "", ""]
         except:
             pass
+    
+    work_instruction_df=pd.DataFrame(
+        work_instruction_records,
+        columns=[
+            "SN",
+            "WORK INSTRUCTION",
+            "TRAINING DATE",
+            "EXPIRY DATE",
+            "PERIOD TO EXPIRE",
+            "STATUS"
+        ]
+    )
+    if not work_instruction_df.empty:
+        work_instruction_df["SN"] = range(1, len(work_instruction_df) + 1)
     # --- Write ONE Excel file with 2 sheets ---
     wb = Workbook()
     wb.remove(wb.active)
@@ -517,6 +378,11 @@ for _, emp in employees.iterrows():
     for r in dataframe_to_rows(export_df, index=False, header=True):
         ws_exam.append(r)
     style_sheet(ws_exam)
+    ws_work_instruction = wb.create_sheet(title="Work Instruction")
+    ws_work_instruction.append([f"WORK INSTRUCTION DASHBOARD FOR {emp_name} ({emp_no})"])
+    for r in dataframe_to_rows(work_instruction_df, index=False, header=True):
+        ws_work_instruction.append(r)
+    style_sheet(ws_work_instruction)
 
     # safe_emp_name = re.sub(r'[\\/*?:"<>|]', "", str(emp_name)).strip()
     safe_emp_name = str(emp_name).strip()
@@ -531,14 +397,5 @@ for _, emp in employees.iterrows():
         qr_filename = f"Qr_code_for_{safe_emp_name}_{emp_no}.png"
     file_path = output_dir/filename
     wb.save(file_path)
-    
-    file_url = BASE_URL + file_path.name
-    # qr_file_path = qr_dir/qr_filename
-    # qr = qrcode.QRCode(version=1, box_size=10, border=4)
-    # qr.add_data(file_url)
-    # qr.make(fit=True)
-    # img = qr.make_image(fill_color="black", back_color="white")
-    # img.save(qr_file_path)
-    # create_id_card(emp_no, emp_name, qr_file_path,logo_path)
 
 print("Training reports created successfully!")
