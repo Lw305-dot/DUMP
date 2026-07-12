@@ -12,11 +12,14 @@ from PIL import Image as PILImage, ImageDraw, ImageFont
 PHOTO_DIR = Path("/workspaces/DUMP/Generated_IDs5")
 master_path = Path("/workspaces/DUMP/Training Progress Tracker.xlsx")
 training_list_path = Path("/workspaces/DUMP/MASTER LIST Module number.xlsx")
+matartraining_list_path = Path("/workspaces/DUMP/Matar Trainings.xlsx")
 training_sheets = pd.read_excel(training_list_path, sheet_name=["Manuals", "SOPs"])
 training_lookup_df = pd.concat(training_sheets.values(), ignore_index=True)
-output_dir = Path("/workspaces/DUMP/Employee_Reports_wi47")
+output_dir = Path("/workspaces/DUMP/Employee_Reports_wi48")
 output_dir.mkdir(exist_ok=True)   
 
+
+matar_df = pd.read_excel(matartraining_list_path,sheet_name="Cargo Matar SOPS")
     
 def find_header_row(sheet_name, file_path):
     preview = pd.read_excel(file_path, sheet_name=sheet_name, header=None, nrows=20)
@@ -47,12 +50,17 @@ training_lookup = {
     }
     for _, row in training_lookup_df.iterrows()
 }
+matar_df.columns = (matar_df.columns.astype(str).str.strip().str.lower().str.replace(r"[^\w\s]", "", regex=True))
+
+matar_df.columns = deduplicate_columns(matar_df.columns)
+
+
 EXAM_OUTDATED_DAYS = 8000  
 WRONGLY_FORMATTED_AFTER_DAYS = -10000 
 HEADER_FILL = PatternFill(fill_type="solid", start_color="1F4E78", end_color="1F4E78") 
 TITLE_FONT = Font(bold=True, color="FFFFFF")
 ROW_RED_FILL = PatternFill(fill_type="solid", start_color="FFC7CE", end_color="FFC7CE") 
-ROW_YELLOW_FILL = PatternFill(fill_type="solid", start_color="FFFACD", end_color="FFFACD")  # Light Yellow
+ROW_YELLOW_FILL = PatternFill(fill_type="solid", start_color="FFFACD", end_color="FFFACD")
 def style_sheet(ws):
     # Style the first row as header (merged row should be done outside if needed)
     ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=7)
@@ -198,6 +206,7 @@ for _, emp in employees.iterrows():
     # --- Collect Training Records ---
     training_records = []
     work_instruction_records = []
+    matar_training_records = []
     for sheet_name, df in all_dfs.items():
         if sheet_name.upper() == "EXAMS":
             continue  # exams handled separately
@@ -274,6 +283,31 @@ for _, emp in employees.iterrows():
                     status
                 ])
 
+        emp_matar_rows = matar_df[matar_df["emp no"] == emp_no]
+        fixed_cols =[
+            "emp no",
+            "employee name",
+            "team",
+            "count"
+        ]
+        for _, row in emp_matar_rows.iterrows():
+            for col in matar_df.columns:
+                if col.lower() in fixed_cols:
+                    continue
+                training_date = pd.to_datetime(row.get(col, None), errors="coerce")
+                if pd.isna(training_date):
+                    continue
+                expiry_date = training_date + timedelta(days=8000)
+                days_left = (expiry_date - today).days
+                status = ("EXPIRING SOON" if 1 <= days_left < 45 else "VALID"if days_left >= 40 else "EXPIRED")
+                matar_training_records.append([
+                    None,
+                    col,
+                    training_date.strftime('%d-%b-%Y'),
+                    expiry_date.strftime('%d-%b-%Y'),
+                    days_left,
+                    status
+                ])
 
     # Add emp_desg_value as a final row in the training dashboard
     # Fill other columns with empty strings for clarity
@@ -363,6 +397,19 @@ for _, emp in employees.iterrows():
     )
     if not work_instruction_df.empty:
         work_instruction_df["SN"] = range(1, len(work_instruction_df) + 1)
+    matar_training_df = pd.DataFrame(
+        matar_training_records,
+        columns=[
+            "SN",
+            "MATAR TRAINING",
+            "TRAINING DATE",
+            "EXPIRY DATE",
+            "PERIOD TO EXPIRE",
+            "STATUS"
+        ]
+    )
+    if not matar_training_df.empty:
+        matar_training_df["SN"] = range(1, len(matar_training_df) + 1)
     # --- Write ONE Excel file with 2 sheets ---
     wb = Workbook()
     wb.remove(wb.active)
@@ -383,7 +430,11 @@ for _, emp in employees.iterrows():
     for r in dataframe_to_rows(work_instruction_df, index=False, header=True):
         ws_work_instruction.append(r)
     style_sheet(ws_work_instruction)
-
+    ws_matar = wb.create_sheet(title="Matar Training")
+    ws_matar.append([f"MATAR TRAINING DASHBOARD FOR {emp_name} ({emp_no})"])
+    for r in dataframe_to_rows(matar_training_df, index=False, header=True):
+        ws_matar.append(r)
+    style_sheet(ws_matar)
     # safe_emp_name = re.sub(r'[\\/*?:"<>|]', "", str(emp_name)).strip()
     safe_emp_name = str(emp_name).strip()
     if safe_emp_name.lower() == "nan" or safe_emp_name == "" or pd.isna(emp_name):
