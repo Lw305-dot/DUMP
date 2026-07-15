@@ -15,7 +15,7 @@ training_list_path = Path("/workspaces/DUMP/MASTER LIST Module number.xlsx")
 matartraining_list_path = Path("/workspaces/DUMP/Matar Trainings.xlsx")
 training_sheets = pd.read_excel(training_list_path, sheet_name=["Manuals", "SOPs"])
 training_lookup_df = pd.concat(training_sheets.values(), ignore_index=True)
-output_dir = Path("/workspaces/DUMP/Employee_Reports_wi48")
+output_dir = Path("/workspaces/DUMP/Employee_Reports_wi49")
 output_dir.mkdir(exist_ok=True)   
 
 
