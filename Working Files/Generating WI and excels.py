@@ -6,15 +6,15 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from pathlib import Path
 from datetime import datetime, timedelta
 import re
-import qrcode
-from PIL import Image as PILImage, ImageDraw, ImageFont
+# import qrcode
+# from PIL import Image as PILImage, ImageDraw, ImageFont
 
 PHOTO_DIR = Path("/workspaces/DUMP/Generated_IDs5")
 master_path = Path("/workspaces/DUMP/Training Progress Tracker.xlsx")
 training_list_path = Path("/workspaces/DUMP/MASTER LIST Module number.xlsx")
 training_sheets = pd.read_excel(training_list_path, sheet_name=["Manuals", "SOPs"])
 training_lookup_df = pd.concat(training_sheets.values(), ignore_index=True)
-output_dir = Path("/workspaces/DUMP/Employee_Reports_wi47")
+output_dir = Path("/workspaces/DUMP/Employee_Reports_wi48")
 output_dir.mkdir(exist_ok=True)   
 
     
