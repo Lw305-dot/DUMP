@@ -5,7 +5,7 @@ from PIL import Image as PILImage
 import io
 
 # --- CONFIG ---
-EXCEL_PATH = Path("/workspaces/DUMP/EMPLOYEE PROFILE 2026.xlsx") 
+EXCEL_PATH = Path("/workspaces/DUMP/Copy EMPLOYEE PROFILE 2026.xlsx") 
 OUTPUT_DIR = Path("Generated_Photos1")        
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -113,7 +113,7 @@ def run():
             seen_ids.add(safe_id)
             made += 1
 
-    print(f"Done. Created {made} pdf(s) in: {OUTPUT_DIR}")
+    print(f"Done. Created {made} image(s) in: {OUTPUT_DIR}")
 
 
 if __name__ == "__main__":
